@@ -25,7 +25,7 @@ from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY
 CLIENT_SECRETS_FILE = 'client_secret.json'
 SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly']
 API_SERVICE_NAME = 'youtubeAnalytics'
-API_VERSION = 'v1'
+API_VERSION = 'v2'
 
 def get_authenticated_service():
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
@@ -33,14 +33,14 @@ def get_authenticated_service():
     return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
 def get_vid_data(title, start, end, service):
-    youtubeAnalytics.reports().query(
-        ids='channel==MINE',
+    service.reports().query(
+        ids='channel==UCShHFwKyhcDo3g7hr4f1R8A',
         startDate=start,
         endDate=end,
-        metrics=','.join(VIDSTATSTITLES)
+        metrics=','.join(VIDSTATSTITLES),
         dimensions='day',
         sort='day'
-    )
+    ).execute()
 
 
 def load_data(directory):
