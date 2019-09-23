@@ -69,9 +69,6 @@ def graph_vid(df, dates, var):
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     plt.show()
 
-def get_vid_data(video, start_date, end_date):
-    
-
 
 def main():
     directory = input("Enter the folder containing the reporting data: ")
