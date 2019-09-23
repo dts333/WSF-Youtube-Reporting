@@ -7,6 +7,6 @@ Created on Wed Sep  4 14:10:01 2019
 """
 
 VIDSTATS = ['views', 'average_percentage_viewed']
-VIDSTATSTITLES = ['average_watch_percentage', 'views']
+VIDSTATSTITLES = ['views', 'averageViewPercentage', 'relativeRetentionPerformance']
 CHANNELSTATS = ['traffic_source_type']
 DATA_DIRECTORY = 'YoutubeData'
