@@ -7,13 +7,41 @@ Created on Wed Sep  4 11:40:20 2019
 """
 
 import googleapiclient
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
 import os
 import pandas as pd
 import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseDownload
+from google_auth_oauthlib.flow import InstalledAppFlow
+
 from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY
+
+CLIENT_SECRETS_FILE = 'client_secret.json'
+SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly']
+API_SERVICE_NAME = 'youtubeAnalytics'
+API_VERSION = 'v1'
+
+def get_authenticated_service():
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    credentials = flow.run_console()
+    return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
+
+def get_vid_data(title, start, end, service):
+    youtubeAnalytics.reports().query(
+        ids='channel==MINE',
+        startDate=start,
+        endDate=end,
+        metrics=','.join(VIDSTATSTITLES)
+        dimensions='day',
+        sort='day'
+    )
+
 
 def load_data(directory):
     data = pd.DataFrame(columns=['date', 'video_title'])
@@ -51,6 +79,9 @@ def main():
     data, dates = load_data(directory)
     for var in VIDSTATS:
         graph_vid(data, dates, var)
+
+def main2():
+    youtube_analytics = get_authenticated_service()
 
 
 if __name__ == '__main__':
