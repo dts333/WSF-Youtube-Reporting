@@ -42,9 +42,13 @@ def get_vid_data(vidID, start, end, service):
             dimensions='insightTrafficSourceType',
             filters='video=={}'.format(vidID)
             ).execute()
-    itst = {r[0]: r[1] for r in itst['rows']}
     
-    df = pd.DataFrame.from_dict(itst, orient='index', columns='views')
+    views=0
+    for r in itst['rows']: views += r[1]
+    
+    data_dict = {r[0]: r[1] for r in itst['rows']}
+    
+    df = pd.DataFrame.from_dict(itst, orient='index', columns=vidID)
     views = df.views.sum()
     channel_views = df.loc['YT_CHANNEL', 'views']
     notifications = df.loc['NOTIFICATION', 'views']
@@ -59,9 +63,9 @@ def get_vid_data(vidID, start, end, service):
             filters='video=={};insightTrafficSourceType==SUBSCRIBER'.format(vidID),
             maxResults=10
             ).execute()
-    sub_deets = {r[0]: r[1] for r in sub_deets['rows']}
+    for r in sub_deets['rows']: data_dict[r[0]] = r[1]
     home = sub_deets['what-to-watch']
-    subscritions = sub_deets['/my_subscriptions']
+    subscriptions = sub_deets['/my_subscriptions']
     
 
 
@@ -101,7 +105,16 @@ def main():
 
 def main2():
     youtube_analytics = get_authenticated_service()
-
+    top5 = youtube_analytics.reports().query(
+            dimensions='video',
+            metrics='views',
+            ids='channel==UCShHFwKyhcDo3g7hr4f1R8A',
+            maxResults=5,
+            sort='-views',
+            startDate='2019-08-01',
+            endDate='2019-09-01').execute()['rows']
+    top5 = pd.DataFrame(top5, columns['id', 'views'])
+    for col in []
 
 if __name__ == '__main__':
     main()
