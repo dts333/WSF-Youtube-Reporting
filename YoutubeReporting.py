@@ -20,10 +20,11 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY
+from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
-SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly']
+SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly',
+          'https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME = 'youtubeAnalytics'
 API_VERSION = 'v2'
 
@@ -32,15 +33,24 @@ def get_authenticated_service():
     credentials = flow.run_console()
     return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
-def get_vid_data(title, start, end, service):
-    service.reports().query(
-        ids='channel==UCShHFwKyhcDo3g7hr4f1R8A',
+def get_vid_data(vidID, start, end, service):
+    views = service.reports().query(
+        ids='channel==' + WSFID,
         startDate=start,
         endDate=end,
-        metrics=','.join(VIDSTATSTITLES),
-        dimensions='day',
-        sort='day'
-    ).execute()
+        metrics='views',
+        filters='video=={}'.format(vidID)
+    ).execute()['rows'][0][0]
+    
+    itst = service.reports().query(
+            ids='channel==' + WSFID,
+            startDate=start,
+            endDate=end,
+            metrics='views',
+            dimensions='insightTrafficSourceType',
+            filters='video=={}'.format(vidID)
+            ).execute()
+    
 
 
 def load_data(directory):

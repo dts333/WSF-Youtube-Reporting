@@ -10,3 +10,4 @@ VIDSTATS = ['views', 'average_percentage_viewed']
 VIDSTATSTITLES = ['views', 'averageViewPercentage', 'relativeRetentionPerformance']
 CHANNELSTATS = ['traffic_source_type']
 DATA_DIRECTORY = 'YoutubeData'
+WSFID = 'UCShHFwKyhcDo3g7hr4f1R8A'
