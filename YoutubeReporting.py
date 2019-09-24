@@ -34,14 +34,6 @@ def get_authenticated_service():
     return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
 def get_vid_data(vidID, start, end, service):
-    views = service.reports().query(
-        ids='channel==' + WSFID,
-        startDate=start,
-        endDate=end,
-        metrics='views',
-        filters='video=={}'.format(vidID)
-    ).execute()['rows'][0][0]
-    
     itst = service.reports().query(
             ids='channel==' + WSFID,
             startDate=start,
@@ -50,6 +42,26 @@ def get_vid_data(vidID, start, end, service):
             dimensions='insightTrafficSourceType',
             filters='video=={}'.format(vidID)
             ).execute()
+    itst = {r[0]: r[1] for r in itst['rows']}
+    
+    df = pd.DataFrame.from_dict(itst, orient='index', columns='views')
+    views = df.views.sum()
+    channel_views = df.loc['YT_CHANNEL', 'views']
+    notifications = df.loc['NOTIFICATION', 'views']
+    suggested = itst['RELATED_VIDEO']
+    
+    sub_deets = service.reports().query(
+            ids='channel==' + WSFID,
+            startDate=start,
+            endDate=end,
+            metrics='views',
+            dimensions='insightTrafficSourceDetail',
+            filters='video=={};insightTrafficSourceType==SUBSCRIBER'.format(vidID),
+            maxResults=10
+            ).execute()
+    sub_deets = {r[0]: r[1] for r in sub_deets['rows']}
+    home = sub_deets['what-to-watch']
+    subscritions = sub_deets['/my_subscriptions']
     
 
 
