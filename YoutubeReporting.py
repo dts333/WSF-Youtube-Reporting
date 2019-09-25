@@ -5,7 +5,7 @@ Created on Wed Sep  4 11:40:20 2019
 
 @author: DannySwift
 """
-
+#%%
 import googleapiclient
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -14,25 +14,31 @@ import pandas as pd
 import re
 import matplotlib.pyplot as plt
 import seaborn as sns
+import sys
 
+#%%
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
 
+#%%
 from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID
 
+#%%
 CLIENT_SECRETS_FILE = 'client_secret.json'
 SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly',
           'https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME = 'youtubeAnalytics'
 API_VERSION = 'v2'
 
+#%%
 def get_authenticated_service():
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
     credentials = flow.run_console()
     return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
+#%%
 def get_vid_data(vidID, start, end, service):
     itst = service.reports().query(
             ids='channel==' + WSFID,
@@ -66,9 +72,26 @@ def get_vid_data(vidID, start, end, service):
     for r in sub_deets['rows']: data_dict[r[0]] = r[1]
     home = sub_deets['what-to-watch']
     subscriptions = sub_deets['/my_subscriptions']
+
+#%%
+def get_dates_titles(ids, client):
+    response = client.videos().list(
+        part='snippet',
+        id=ids
+    ).execute()['items']
+    df = pd.DataFrame(np.array([
+        vid['id'], 
+        vid['snippet']['title'], 
+        vid['snippet']['publishedAt'][:10]] 
+        for vid in response
+        ],
+        columns=['id', 'title', 'start']
+        ))
+    df = df.set_index('id')
     
+    return df
 
-
+#%%
 def load_data(directory):
     data = pd.DataFrame(columns=['date', 'video_title'])
     files = os.listdir(directory)
@@ -104,7 +127,10 @@ def main():
         graph_vid(data, dates, var)
 
 def main2():
+    args = sys.argv[1:]
     youtube_analytics = get_authenticated_service()
+
+
     top5 = youtube_analytics.reports().query(
             dimensions='video',
             metrics='views',
@@ -114,7 +140,9 @@ def main2():
             startDate='2019-08-01',
             endDate='2019-09-01').execute()['rows']
     top5 = pd.DataFrame(top5, columns['id', 'views'])
-    for col in []
+
 
 if __name__ == '__main__':
     main()
+
+#%%
