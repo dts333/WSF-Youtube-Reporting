@@ -23,12 +23,10 @@ from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 #%%
-from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID
+from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID, SCOPES
 
 #%%
 CLIENT_SECRETS_FILE = 'client_secret.json'
-SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly',
-          'https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME = 'youtubeAnalytics'
 API_VERSION = 'v2'
 
@@ -39,7 +37,7 @@ def get_authenticated_service():
     return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
 #%%
-def get_vid_data(vidID, start, end, service):
+def get_vid_data(vidIDs, start, end, service):
     itst = service.reports().query(
             ids='channel==' + WSFID,
             startDate=start,
@@ -66,7 +64,7 @@ def get_vid_data(vidID, start, end, service):
             endDate=end,
             metrics='views',
             dimensions='insightTrafficSourceDetail',
-            filters='video=={};insightTrafficSourceType==SUBSCRIBER'.format(vidID),
+            filters='video=={};insightTrafficSourceType==SUBSCRIBER'.format(','.join(vidIDs)),
             maxResults=10
             ).execute()
     for r in sub_deets['rows']: data_dict[r[0]] = r[1]
@@ -106,6 +104,7 @@ def load_data(directory):
     
     return data, dates
 
+#%%
 def graph_vid(df, dates, var):
     g = sns.lineplot(x='date', y=var, data=df, hue='video_title')
     labels = df.date.unique()
@@ -129,17 +128,25 @@ def main():
 def main2():
     args = sys.argv[1:]
     youtube_analytics = get_authenticated_service()
-
+    new_vids = get_dates_titles(args, youtube_analytics)
+    new_vids['start'] = pd.to_datetime(new_vids['start'], format='%Y-%b-%d')
+    new_vids['end'] = new_vids['start'] + pd.DateOffset(weeks=2)
+    start = new_vids['start'].min()
+    end = new_vids['end'].min()
 
     top5 = youtube_analytics.reports().query(
             dimensions='video',
             metrics='views',
-            ids='channel==UCShHFwKyhcDo3g7hr4f1R8A',
+            ids='channel==' + WSFID,
             maxResults=5,
             sort='-views',
-            startDate='2019-08-01',
-            endDate='2019-09-01').execute()['rows']
+            startDate=start,
+            endDate=end).execute()['rows']
     top5 = pd.DataFrame(top5, columns['id', 'views'])
+    top5names = get_dates_titles(top5.id.values(), youtube_analytics)
+    top5['names'] = top5names['names']
+    top5['start'], top5['end'] = start, end
+    top5 = top5.set_index('id')
 
 
 if __name__ == '__main__':
