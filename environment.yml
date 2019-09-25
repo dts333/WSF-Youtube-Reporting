@@ -1,0 +1,12 @@
+name: WSFYT
+channels:
+- defaults
+- conda-forge
+dependencies:
+- google-auth-oauthlib
+- google-api-python-client
+- matplotlib
+- pandas
+- seaborn
+- pip:
+  - pygsheets
