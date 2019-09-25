@@ -11,6 +11,7 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import os
 import pandas as pd
+import pygsheets
 import re
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -37,8 +38,8 @@ def get_authenticated_service():
     return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
 #%%
-def get_vid_data(vidIDs, start, end, service):
-    itst = service.reports().query(
+def get_vid_data(vidIDs, start, end, client):
+    itst = client.reports().query(
             ids='channel==' + WSFID,
             startDate=start,
             endDate=end,
@@ -58,7 +59,7 @@ def get_vid_data(vidIDs, start, end, service):
     notifications = df.loc['NOTIFICATION', 'views']
     suggested = itst['RELATED_VIDEO']
     
-    sub_deets = service.reports().query(
+    sub_deets = client.reports().query(
             ids='channel==' + WSFID,
             startDate=start,
             endDate=end,
@@ -127,14 +128,14 @@ def main():
 
 def main2():
     args = sys.argv[1:]
-    youtube_analytics = get_authenticated_service()
-    new_vids = get_dates_titles(args, youtube_analytics)
+    client = get_authenticated_service()
+    new_vids = get_dates_titles(args, client)
     new_vids['start'] = pd.to_datetime(new_vids['start'], format='%Y-%b-%d')
     new_vids['end'] = new_vids['start'] + pd.DateOffset(weeks=2)
     start = new_vids['start'].min()
     end = new_vids['end'].min()
 
-    top5 = youtube_analytics.reports().query(
+    top5 = client.reports().query(
             dimensions='video',
             metrics='views',
             ids='channel==' + WSFID,
@@ -143,10 +144,17 @@ def main2():
             startDate=start,
             endDate=end).execute()['rows']
     top5 = pd.DataFrame(top5, columns['id', 'views'])
-    top5names = get_dates_titles(top5.id.values(), youtube_analytics)
+    top5names = get_dates_titles(top5.id.values(), client)
     top5['names'] = top5names['names']
     top5['start'], top5['end'] = start, end
     top5 = top5.set_index('id')
+
+    #Todo: Get Mailchimp data, form full df
+
+    pgsc = pygsheets.authorize(service_file=CLIENT_SECRET_FILE)
+    #make title
+    spreadsheet = pgsc.create(title, template=TEMPLATE, folder=GFOLDER)
+    spreadsheet[0].set_dataframe(df, (1,20))
 
 
 if __name__ == '__main__':
