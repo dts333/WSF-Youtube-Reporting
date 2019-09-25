@@ -11,3 +11,6 @@ VIDSTATSTITLES = ['views', 'averageViewPercentage', 'relativeRetentionPerformanc
 CHANNELSTATS = ['traffic_source_type']
 DATA_DIRECTORY = 'YoutubeData'
 WSFID = 'UCShHFwKyhcDo3g7hr4f1R8A'
+SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly',
+          'https://www.googleapis.com/auth/youtube.readonly',
+          'https://www.googleapis.com/auth/spreadsheets.readonly']
