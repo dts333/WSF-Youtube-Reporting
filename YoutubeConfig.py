@@ -7,7 +7,10 @@ Created on Wed Sep  4 14:10:01 2019
 """
 
 VIDSTATS = ['views', 'average_percentage_viewed']
-VIDSTATSTITLES = ['views', 'averageViewPercentage', 'relativeRetentionPerformance']
+VIDSTATSTITLES = ['views', 'averageViewPercentage',]
+YT_ROWS = ['Views', 'Views from Home', 'Views from Subscriptions', 
+           'Suggested Videos', 'Channel Pages', 'Notifications']
+#relativeRetentionPerformance is throwing a 400
 CHANNELSTATS = ['traffic_source_type']
 DATA_DIRECTORY = 'YoutubeData'
 WSFID = 'UCShHFwKyhcDo3g7hr4f1R8A'

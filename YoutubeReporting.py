@@ -48,24 +48,26 @@ def get_vid_data(vidID, start, end, service):
     
     data_dict = {r[0]: r[1] for r in itst['rows']}
     
-    df = pd.DataFrame.from_dict(itst, orient='index', columns=vidID)
-    views = df.views.sum()
-    channel_views = df.loc['YT_CHANNEL', 'views']
-    notifications = df.loc['NOTIFICATION', 'views']
-    suggested = itst['RELATED_VIDEO']
+    #df = pd.DataFrame.from_dict(itst, orient='index', columns=vidID)
+    #views = df.views.sum()
+    #channel_views = df.loc['YT_CHANNEL', 'views']
+    #notifications = df.loc['NOTIFICATION', 'views']
+    #suggested = itst['RELATED_VIDEO']
     
     sub_deets = service.reports().query(
             ids='channel==' + WSFID,
             startDate=start,
             endDate=end,
             metrics='views',
+            sort='-views',
             dimensions='insightTrafficSourceDetail',
             filters='video=={};insightTrafficSourceType==SUBSCRIBER'.format(vidID),
-            maxResults=10
+            maxResults=25
             ).execute()
     for r in sub_deets['rows']: data_dict[r[0]] = r[1]
-    home = sub_deets['what-to-watch']
-    subscriptions = sub_deets['/my_subscriptions']
+    df = pd.DataFrame(data_dict, index=[vidID])
+    
+    return df
     
 
 
@@ -111,10 +113,12 @@ def main2():
             ids='channel==UCShHFwKyhcDo3g7hr4f1R8A',
             maxResults=5,
             sort='-views',
-            startDate='2019-08-01',
-            endDate='2019-09-01').execute()['rows']
-    top5 = pd.DataFrame(top5, columns['id', 'views'])
-    for col in []
-
+            startDate=start,
+            endDate=end).execute()['rows']
+    top5 = pd.DataFrame(top5, columns=['id', 'views'])
+    for vid in top5['id']:
+        df = get_vid_data(vid, start, end, youtube_analytics)
+        top5 = top5.join(df)
+    
 if __name__ == '__main__':
     main()
