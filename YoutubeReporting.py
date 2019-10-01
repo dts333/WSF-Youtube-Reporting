@@ -19,8 +19,10 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
+from mailchimp3 import Mailchimp
 
 from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID
+from Secrets import MC_API
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
 SCOPES = ['https://www.googleapis.com/auth/yt-analytics.readonly',
@@ -47,6 +49,7 @@ def get_vid_data(vidID, start, end, service):
     for r in itst['rows']: views += r[1]
     
     data_dict = {r[0]: r[1] for r in itst['rows']}
+    data_dict['Views'] = views
     
     #df = pd.DataFrame.from_dict(itst, orient='index', columns=vidID)
     #views = df.views.sum()
@@ -69,6 +72,30 @@ def get_vid_data(vidID, start, end, service):
     
     return df
     
+
+def get_social_data(vidID, start, end, service):
+    externals = service.reports().query(
+            ids='channel==' + WSFID,
+            startDate=start,
+            endDate=end,
+            metrics='views',
+            sort='-views',
+            dimensions='insightTrafficSourceDetail',
+            filters='video=={};insightTrafficSourceType==EXT_URL'.format(vidID),
+            maxResults=25
+            ).execute()
+    fb = 0
+    insta = 0
+    twitter = 0
+    for r in externals['rows']:
+        if 'facebook' in r[0].lower():
+            fb += r[1]
+        elif 'insta' in r[0].lower():
+            insta += r[1]
+        elif 'twitter' in r[0].lower():
+            twitter += r[1]
+    
+    return(pd.DataFrame(index=[vidID], data={'Facebook':fb, 'Instagram':insta, 'Twitter':twitter}))
 
 
 def load_data(directory):
@@ -106,7 +133,43 @@ def main():
         graph_vid(data, dates, var)
 
 def main2():
+    mc_client = Mailchimp(mc_api=MC_API)
+    campaigns=[]
+    vid_ids = []
+    campaign = input('Enter campaign ID: ')
+    while campaign != '':
+        campaigns.append(campaign)
+        vid_ids.append(input('Enter video ID: '))
+        campaign = input('Enter campaign ID: ')
+    for campaign in campaigns:
+        report = mc_client.reports.get(campaign)
+        title = report['campaign_title']
+        unsubscribed = report['unsubscribed']
+        date = report['send_time']
+        recipients = report['emails_sent']
+        opens = report['opens'].unique_opens
+        open_rate = report['opens'].open_rate
+        clicks = report['clicks'].clicks_total
+        click_rate = report['clicks'].click_rate
+    
     youtube_analytics = get_authenticated_service()
+    new_vids = pd.DataFrame()
+    social = pd.DataFrame()
+    for vid in vid_ids:
+        new_vids = pd.concat([new_vids, get_vid_data(vid, youtube_analytics)])
+        social = pd.concat([social, get_social_data(vid, youtube_analytics)])
+    
+    new_vids = new_vids.rename({'/my_subscriptions':'Subscribers',
+                                'YT_CHANNEL':'Channel Page',
+                                'NOTIFICATION':'Notifications',
+                                'SUBSCRIBER':'Views from Home',
+                                'RELATED_VIDEO':'Suggested Videos'}, axis=1)
+    new_vids = new_vids.drop(['my-history', 'ANNOTATION', 'END_SCREEN',
+                              'EXT_URL', 'NO_LINK_OTHER', 'PLAYLIST', 'PP', 
+                              'YT_OTHER_PAGE', 'YT_PLAYLIST_PAGE', 'YT_SEARCH',
+                              'trend', 'watch-later', 'what-to-watch'], axis=1)
+            
+    
     top5 = youtube_analytics.reports().query(
             dimensions='video',
             metrics='views',
@@ -116,9 +179,21 @@ def main2():
             startDate=start,
             endDate=end).execute()['rows']
     top5 = pd.DataFrame(top5, columns=['id', 'views'])
-    for vid in top5['id']:
+    top5 = top5.set_index('id')
+    for vid in top5.index:
         df = get_vid_data(vid, start, end, youtube_analytics)
-        top5 = top5.join(df)
+        df['id'] = vid
+        top5 = top5.combine_first(df)
+    top5 = top5.rename({'/my_subscriptions':'Subscribers',
+                                'YT_CHANNEL':'Channel Page',
+                                'NOTIFICATION':'Notifications',
+                                'SUBSCRIBER':'Views from Home',
+                                'RELATED_VIDEO':'Suggested Videos'}, axis=1)
+    top5 = top5.drop(['my-history', 'ANNOTATION', 'END_SCREEN',
+                              'EXT_URL', 'NO_LINK_OTHER', 'PLAYLIST', 'PP', 
+                              'YT_OTHER_PAGE', 'YT_PLAYLIST_PAGE', 'YT_SEARCH',
+                              'trend', 'watch-later', 'what-to-watch', 'id'], axis=1)
+    
     
 if __name__ == '__main__':
     main()
