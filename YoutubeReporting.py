@@ -97,6 +97,23 @@ def get_social_data(vidID, start, end, service):
     
     return(pd.DataFrame(index=[vidID], data={'Facebook':fb, 'Instagram':insta, 'Twitter':twitter}))
 
+def get_demographic_data(vidID, start, end, service):
+    demographics = service.reports().query(
+            ids='channel==' + WSFID,
+            startDate=start,
+            endDate=end,
+            metrics='viewerPercentage',
+            dimensions='ageGroup,gender',
+            filters='video=={}'.format(vidID),
+            maxResults=25
+            ).execute()
+    
+    data_dict = {r[0] + r[1] : r[2] for r in demographics['rows']}
+    df = pd.DataFrame(data_dict, index=[vidID])
+    
+    return df
+
+
 
 def load_data(directory):
     data = pd.DataFrame(columns=['date', 'video_title'])
@@ -124,13 +141,6 @@ def graph_vid(df, dates, var):
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     plt.show()
 
-
-def main():
-    directory = input("Enter the folder containing the reporting data: ")
-    directory = DATA_DIRECTORY + os.sep + directory
-    data, dates = load_data(directory)
-    for var in VIDSTATS:
-        graph_vid(data, dates, var)
 
 def main2():
     mc_client = Mailchimp(mc_api=MC_API)
