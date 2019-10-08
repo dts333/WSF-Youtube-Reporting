@@ -114,7 +114,7 @@ def get_demographic_data(vidID, start, end, service):
     return df
 
 def get_mc_data(campaign, client):
-    report = mc_client.reports.get(campaign)
+    report = client.reports.get(campaign)
     df = pd.DataFrame(index=[campaign], data={
             'Title':report['campaign_title'], 
             'Unsubscribed':report['unsubscribed'], 
@@ -166,9 +166,16 @@ def main():
         campaign = input('Enter campaign ID: ')
     mcdf = pd.DataFrame()
     for campaign in campaigns:
-        
+        mcdf = pd.concat([mcdf, get_mc_data(campaign, mc_client)])
     
-    
+    mc_times = pd.to_datetime(mcdf['Send Time'])
+    start = mc_times.max()
+    end = start + pd.Timedelta(days=14)
+    if end > pd.Timestamp.today():
+        end = pd.Timestamp.today()
+        start = end - pd.Timedelta(days=14)
+    start = start.strftime('%Y-%m-%d')
+    end = end.strftime('%Y-%m-%d')
     
     youtube_analytics = get_authenticated_service()
     new_vids = pd.DataFrame()
