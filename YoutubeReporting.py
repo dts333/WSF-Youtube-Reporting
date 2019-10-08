@@ -20,8 +20,9 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
 from mailchimp3 import Mailchimp
+from gspread_pandas import Client
 
-from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID
+from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID, GOOGLE_SHEET
 from Secrets import MC_API
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
@@ -97,7 +98,7 @@ def get_social_data(vidID, start, end, service):
     
     return(pd.DataFrame(index=[vidID], data={'Facebook':fb, 'Instagram':insta, 'Twitter':twitter}))
 
-def get_demographic_data(vidID, start, end, service):
+def get_demo_data(vidID, start, end, service):
     demographics = service.reports().query(
             ids='channel==' + WSFID,
             startDate=start,
@@ -205,10 +206,15 @@ def main():
             endDate=end).execute()['rows']
     top5 = pd.DataFrame(top5, columns=['id', 'views'])
     top5 = top5.set_index('id')
+    top5demos = pd.DataFrame()
+    top5soc = pd.DataFrame()
     for vid in top5.index:
         df = get_vid_data(vid, start, end, youtube_analytics)
         df['id'] = vid
         top5 = top5.combine_first(df)
+        top5demos = pd.concat([top5demos, get_demo_data(vid, start, end, youtube_analytics)])
+        top5soc = pd.concat([top5soc, get_social_data(vid, start, end, youtube_analytics)])
+        
     top5 = top5.rename({'/my_subscriptions':'Subscribers',
                                 'YT_CHANNEL':'Channel Page',
                                 'NOTIFICATION':'Notifications',
@@ -218,6 +224,19 @@ def main():
                               'EXT_URL', 'NO_LINK_OTHER', 'PLAYLIST', 'PP', 
                               'YT_OTHER_PAGE', 'YT_PLAYLIST_PAGE', 'YT_SEARCH',
                               'trend', 'watch-later', 'what-to-watch', 'id'], axis=1)
+    
+    gsp_client = Client()
+    sheet = gsp_client.open(GOOGLE_SHEET)
+    template = sheet.sheet_to_df(sheet='Template')
+    today = pd.Timestamp.today().strftime('%B %d, %Y')
+    sheet.df_to_sheet(template, sheet=today)
+    sheet.df_to_sheet(mcdf.T, sheet=today, start=(2,6), index=False)
+    sheet.df_to_sheet(social.T, sheet=today, start=(2,17), index=False)
+    sheet.df_to_sheet(new_vids.T, sheet=today, start=(2,21), index=False)
+    sheet.df_to_sheet(top5soc.T, sheet=today, start=(7,17), index=False)
+    sheet.df_to_sheet(top5.T, sheet=today, start=(7,21), index=False)
+    sheet.df_to_sheet(top5demos.T, sheet=today, start=(7,28), index=False)
+    
     
     
 if __name__ == '__main__':
