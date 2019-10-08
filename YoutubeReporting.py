@@ -113,7 +113,20 @@ def get_demographic_data(vidID, start, end, service):
     
     return df
 
-
+def get_mc_data(campaign, client):
+    report = mc_client.reports.get(campaign)
+    df = pd.DataFrame(index=[campaign], data={
+            'Title':report['campaign_title'], 
+            'Unsubscribed':report['unsubscribed'], 
+            'Send Time':report['send_time'], 
+            'Recipients':report['emails_sent'],
+            'Opens':report['opens'].unique_opens,
+            'Open Rate':report['opens'].open_rate,
+            'Clicks':report['clicks'].clicks_total,
+            'Click Rate':report['clicks'].click_rate
+            })
+    
+    return df
 
 def load_data(directory):
     data = pd.DataFrame(columns=['date', 'video_title'])
@@ -142,7 +155,7 @@ def graph_vid(df, dates, var):
     plt.show()
 
 
-def main2():
+def main():
     mc_client = Mailchimp(mc_api=MC_API)
     campaigns=[]
     vid_ids = []
@@ -151,16 +164,11 @@ def main2():
         campaigns.append(campaign)
         vid_ids.append(input('Enter video ID: '))
         campaign = input('Enter campaign ID: ')
+    mcdf = pd.DataFrame()
     for campaign in campaigns:
-        report = mc_client.reports.get(campaign)
-        title = report['campaign_title']
-        unsubscribed = report['unsubscribed']
-        date = report['send_time']
-        recipients = report['emails_sent']
-        opens = report['opens'].unique_opens
-        open_rate = report['opens'].open_rate
-        clicks = report['clicks'].clicks_total
-        click_rate = report['clicks'].click_rate
+        
+    
+    
     
     youtube_analytics = get_authenticated_service()
     new_vids = pd.DataFrame()
