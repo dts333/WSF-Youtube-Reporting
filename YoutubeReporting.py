@@ -181,9 +181,11 @@ def main():
     youtube_analytics = get_authenticated_service()
     new_vids = pd.DataFrame()
     social = pd.DataFrame()
+    demos = pd.DataFrame()
     for vid in vid_ids:
         new_vids = pd.concat([new_vids, get_vid_data(vid, youtube_analytics)])
         social = pd.concat([social, get_social_data(vid, youtube_analytics)])
+        demos = pd.concat([demos, get_demo_data(vid, youtube_analytics)])
     
     new_vids = new_vids.rename({'/my_subscriptions':'Subscribers',
                                 'YT_CHANNEL':'Channel Page',
