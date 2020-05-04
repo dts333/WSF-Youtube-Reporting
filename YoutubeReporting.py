@@ -24,7 +24,7 @@ from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 #%%
-from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID, SCOPES
+from YoutubeConfig import VIDSTATS, VIDSTATSTITLES, CHANNELSTATS, DATA_DIRECTORY, WSFID, SCOPES#, TEMPLATE, GFOLDER
 
 #%%
 CLIENT_SECRETS_FILE = 'client_secret.json'
