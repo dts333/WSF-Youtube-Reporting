@@ -147,25 +147,6 @@ def get_demo_data(vidID, start, end, service):
     return df
 
 
-def get_mc_data(campaign, client):
-    report = client.reports.get(campaign)
-    df = pd.DataFrame(
-        index=[campaign],
-        data={
-            "Title": report["campaign_title"],
-            "Unsubscribed": report["unsubscribed"],
-            "Send Time": report["send_time"],
-            "Recipients": report["emails_sent"],
-            "Opens": report["opens"].unique_opens,
-            "Open Rate": report["opens"].open_rate,
-            "Clicks": report["clicks"].clicks_total,
-            "Click Rate": report["clicks"].click_rate,
-        },
-    )
-
-    return df
-
-
 def load_data(directory):
     data = pd.DataFrame(columns=["date", "video_title"])
     files = os.listdir(directory)
