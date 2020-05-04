@@ -19,7 +19,6 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
-from mailchimp3 import Mailchimp
 from gspread_pandas import Client
 
 from YoutubeConfig import (
@@ -183,7 +182,6 @@ def graph_vid(df, dates, var):
 
 
 def main():
-    mc_client = Mailchimp(mc_api=MC_API)
     campaigns = []
     vid_ids = []
     campaign = input("Enter campaign ID: ")
@@ -191,11 +189,7 @@ def main():
         campaigns.append(campaign)
         vid_ids.append(input("Enter video ID: "))
         campaign = input("Enter campaign ID: ")
-    mcdf = pd.DataFrame()
-    for campaign in campaigns:
-        mcdf = pd.concat([mcdf, get_mc_data(campaign, mc_client)])
 
-    mc_times = pd.to_datetime(mcdf["Send Time"])
     start = mc_times.max()
     end = start + pd.Timedelta(days=14)
     if end > pd.Timestamp.today():
