@@ -12,6 +12,7 @@ import google_auth_oauthlib.flow
 import os
 import pandas as pd
 import re
+import requests
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -44,6 +45,19 @@ def get_authenticated_service():
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
     credentials = flow.run_console()
     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+
+
+def get_all_videos_in_channel():
+    username = "worldsciencefestival"
+    url = f"https://www.youtube.com/user/{username}/videos"
+    page = requests.get(url).content
+    data = str(page).split(" ")
+    item = 'href="/watch?'
+    vids = [
+        line.replace('href="/watch?v=', "")[:-1] for line in data if item in line
+    ]  # list of all videos listed twice
+
+    return vids
 
 
 def get_vid_data(vidID, start, end, service):
