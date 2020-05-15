@@ -6,6 +6,7 @@ Created on Wed Sep  4 14:10:01 2019
 @author: DannySwift
 """
 
+APIKEY = ''
 VIDSTATS = ['views', 'average_percentage_viewed']
 VIDSTATSTITLES = ['views', 'averageViewPercentage',]
 YT_ROWS = ['Views', 'Views from Home', 'Views from Subscriptions', 
@@ -14,3 +15,4 @@ YT_ROWS = ['Views', 'Views from Home', 'Views from Subscriptions',
 CHANNELSTATS = ['traffic_source_type']
 DATA_DIRECTORY = 'YoutubeData'
 WSFID = 'UCShHFwKyhcDo3g7hr4f1R8A'
+YDEID = 'PLKy-B3Qf_RDVL6Z_CmgKf0tAbpXTua9mV'
