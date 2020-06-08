@@ -6,7 +6,6 @@ Created on Wed Sep  4 14:10:01 2019
 @author: DannySwift
 """
 
-APIKEY = "AIzaSyD8Ib7mNFAFXlgmXh9YqcnCb2wxwh-K5bg"
 VIDSTATS = ["views", "average_percentage_viewed"]
 VIDSTATSTITLES = [
     "views",
