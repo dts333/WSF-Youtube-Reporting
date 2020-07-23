@@ -24,6 +24,7 @@ CHANNELSTATS = ["traffic_source_type"]
 DATA_DIRECTORY = "YoutubeData"
 WSFID = "UCShHFwKyhcDo3g7hr4f1R8A"
 YDEID = "PLKy-B3Qf_RDVL6Z_CmgKf0tAbpXTua9mV"
+CJID = "PLKy-B3Qf_RDVqSnLTf4b0cXeeZaiibRII"
 
 COOL_JOBS = {
     "W8E9_R0EWDs": "The Bird Whisperer",
@@ -42,3 +43,7 @@ COOL_JOBS = {
     "_ePLqrHUhaw": "Nano Examiner",
     "BCH6Iei-xcw": "Robot Senser",
 }
+
+BIG_IDEAS_URL = (
+    "https://www.worldsciencefestival.com/video/video-library/?topic=&playlist=45075&meta="
+)
