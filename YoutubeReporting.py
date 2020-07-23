@@ -5,7 +5,7 @@ Created on Wed Sep  4 11:40:20 2019
 
 @author: DannySwift
 """
-
+#%%
 import googleapiclient
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -14,23 +14,32 @@ import pandas as pd
 import re
 import requests
 import matplotlib.pyplot as plt
+import pickle
 import seaborn as sns
 
+#%%
+from bs4 import BeautifulSoup
+from datetime import datetime
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from google_auth_oauthlib.flow import InstalledAppFlow
-from gspread_pandas import Client
+
+# from gspread_pandas import Client
 
 from YoutubeConfig import (
+    APIKEY,
     VIDSTATS,
     VIDSTATSTITLES,
     CHANNELSTATS,
     DATA_DIRECTORY,
     WSFID,
-    GOOGLE_SHEET,
+    COOL_JOBS,
+    CJID,
+    YDEID,
+    BIG_IDEAS_URL,
+    # GOOGLE_SHEET,
 )
-from Secrets import MC_API
 
 CLIENT_SECRETS_FILE = "client_secret.json"
 SCOPES = [
@@ -40,13 +49,14 @@ SCOPES = [
 API_SERVICE_NAME = "youtubeAnalytics"
 API_VERSION = "v2"
 
-
+#%%
 def get_authenticated_service():
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
     credentials = flow.run_console()
     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
+#%% Not getting all of them...
 def get_all_videos_in_channel():
     username = "worldsciencefestival"
     url = f"https://www.youtube.com/user/{username}/videos"
@@ -60,6 +70,7 @@ def get_all_videos_in_channel():
     return vids
 
 
+#%%
 def get_vid_data(vidID, start, end, service):
     itst = (
         service.reports()
@@ -108,6 +119,7 @@ def get_vid_data(vidID, start, end, service):
     return df
 
 
+#%%
 def get_social_data(vidID, start, end, service):
     externals = (
         service.reports()
@@ -139,6 +151,7 @@ def get_social_data(vidID, start, end, service):
     )
 
 
+#%%
 def get_demo_data(vidID, start, end, service):
     demographics = (
         service.reports()
@@ -160,6 +173,88 @@ def get_demo_data(vidID, start, end, service):
     return df
 
 
+#%%
+def yt_data_from_wsf(playlist, pages):
+    views = 0
+    for i in range(pages):
+        url = f"https://www.worldsciencefestival.com/video/video-library/page/{i+1}/?topic&playlist={playlist}&meta"
+        soup = BeautifulSoup(requests.get(url).content, "html.parser")
+        big_ideas = soup.find_all(attrs={"class": "video-category-duration"})
+        for div in big_ideas:
+            s = div.getText().split(" ")[0].replace(",", "")
+            if ":" not in s:
+                views += int(s)
+
+    return views
+
+
+def fetch_all_data():
+    views = {}
+    views["Big Ideas"] = yt_data_from_wsf(45075, 6)
+    # views['Cool Jobs'] = yt_data_from_wsf(64848, 2)
+    views["Your Daily Equation"] = yt_data_from_wsf(64767, 2)
+    views["Kavli"] = yt_data_from_wsf(34438, 1)
+
+    views["Big Ideas 2019"] = 0
+    for div in BeautifulSoup(
+        requests.get(
+            "https://www.worldsciencefestival.com/video/video-library/page/1/?topic&playlist=45075&meta"
+        ).content,
+        "html.parser",
+    ).find_all(attrs={"class": "video-category-duration"})[:18]:
+        views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
+
+    with open("youtube.pkl", "rb") as f:
+        yt = pickle.load(f)
+
+    views["Your Daily Equation"] = get_yt_views(YDEID, yt)
+    views["Cool Jobs"] = get_yt_views(CJID, yt)
+
+    return views
+
+
+#%%
+def get_yt_views(playlistId, service):
+    """ vids = service.reports().query(
+        ids="channel==" + WSFID,
+        startDate="2008-01-01",
+        endDate=datetime.today().strftime("%Y-%m-%d"),
+        metrics="views,estimatedMinutesWatched",
+        playlist="PLKy-B3Qf_RDVL6Z_CmgKf0tAbpXTua9mV",
+    ) """
+    res = (
+        service.playlistItems()
+        .list(part="snippet", playlistId=playlistId, maxResults="50")
+        .execute()
+    )
+
+    nextPageToken = res.get("nextPageToken")
+    while "nextPageToken" in res:
+        nextPage = (
+            service.playlistItems()
+            .list(part="snippet", playlistId=playlistId, maxResults="50", pageToken=nextPageToken)
+            .execute()
+        )
+        res["items"] = res["items"] + nextPage["items"]
+
+        if "nextPageToken" not in nextPage:
+            res.pop("nextPageToken", None)
+        else:
+            nextPageToken = nextPage["nextPageToken"]
+
+    ids = []
+    for item in res["items"]:
+        ids.append(item["snippet"]["resourceId"]["videoId"])
+
+    views = 0
+    vids = service.videos().list(part="statistics", id=ids).execute()
+    for vid in vids["items"]:
+        views += int(vid["statistics"]["viewCount"])
+
+    return views
+
+
+#%%
 def load_data(directory):
     data = pd.DataFrame(columns=["date", "video_title"])
     files = os.listdir(directory)
