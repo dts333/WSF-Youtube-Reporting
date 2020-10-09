@@ -16,6 +16,7 @@ import requests
 import matplotlib.pyplot as plt
 import pickle
 import seaborn as sns
+import urllib
 
 #%%
 from bs4 import BeautifulSoup
@@ -68,6 +69,19 @@ def get_all_videos_in_channel():
     ]  # list of all videos listed twice
 
     return vids
+
+
+def get_titles_from_wsf_html(filename):
+    with open(filename) as f:
+        soup = BeautifulSoup(f, "html.parser")
+    return [x.getText() for x in soup.find_all(attrs={"class: video-title"})]
+
+
+def get_yt_id_from_title(title):
+    html = urllib.request.urlopen(
+        f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(title)}"
+    )
+    return re.findall(r"watch\?v=(\S{11})", html.read().decode())
 
 
 #%%
