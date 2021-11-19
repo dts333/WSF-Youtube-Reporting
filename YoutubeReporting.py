@@ -15,7 +15,6 @@ import re
 import requests
 import matplotlib.pyplot as plt
 import pickle
-import seaborn as sns
 import urllib
 
 #%%
@@ -29,7 +28,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # from gspread_pandas import Client
 
 from YoutubeConfig import (
-    APIKEY,
     VIDSTATS,
     VIDSTATSTITLES,
     CHANNELSTATS,
@@ -218,11 +216,11 @@ def fetch_all_data():
     ).find_all(attrs={"class": "video-category-duration"})[:18]:
         views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
 
-    with open("youtube.pkl", "rb") as f:
-        yt = pickle.load(f)
+    # with open("youtube.pkl", "rb") as f:
+    #    yt = pickle.load(f)
 
-    views["Your Daily Equation"] = get_yt_views(YDEID, yt)
-    views["Cool Jobs"] = get_yt_views(CJID, yt)
+    #views["Your Daily Equation"] = get_yt_views(YDEID, yt)
+    #views["Cool Jobs"] = get_yt_views(CJID, yt)
 
     return views
 
