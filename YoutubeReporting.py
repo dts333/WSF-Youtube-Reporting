@@ -194,7 +194,7 @@ def yt_data_from_wsf(playlist, pages):
         big_ideas = soup.find_all(attrs={"class": "video-category-duration"})
         for div in big_ideas:
             s = div.getText().split(" ")[0].replace(",", "")
-            if ":" not in s:
+            if ":" not in s and len(s) > 0:
                 views += int(s)
 
     return views
@@ -207,14 +207,14 @@ def fetch_all_data():
     views["Your Daily Equation"] = yt_data_from_wsf(64767, 2)
     views["Kavli"] = yt_data_from_wsf(34438, 1)
 
-    views["Big Ideas 2019"] = 0
-    for div in BeautifulSoup(
-        requests.get(
-            "https://www.worldsciencefestival.com/video/video-library/page/1/?topic&playlist=45075&meta"
-        ).content,
-        "html.parser",
-    ).find_all(attrs={"class": "video-category-duration"})[:18]:
-        views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
+    #views["Big Ideas 2019"] = 0
+    #for div in BeautifulSoup(
+    #    requests.get(
+    #        "https://www.worldsciencefestival.com/video/video-library/page/1/?topic&playlist=45075&meta"
+    #    ).content,
+    #    "html.parser",
+    #).find_all(attrs={"class": "video-category-duration"})[:18]:
+    #    views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
 
     # with open("youtube.pkl", "rb") as f:
     #    yt = pickle.load(f)
