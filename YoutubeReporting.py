@@ -207,14 +207,14 @@ def fetch_all_data():
     views["Your Daily Equation"] = yt_data_from_wsf(64767, 2)
     views["Kavli"] = yt_data_from_wsf(34438, 1)
 
-    #views["Big Ideas 2019"] = 0
-    #for div in BeautifulSoup(
-    #    requests.get(
-    #        "https://www.worldsciencefestival.com/video/video-library/page/1/?topic&playlist=45075&meta"
-    #    ).content,
-    #    "html.parser",
-    #).find_all(attrs={"class": "video-category-duration"})[:18]:
-    #    views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
+    views["Big Ideas 2019"] = 0
+    for div in BeautifulSoup(
+        requests.get(
+            "https://www.worldsciencefestival.com/video/video-library/page/1/?topic&playlist=45075&meta"
+        ).content,
+        "html.parser",
+    ).find_all(attrs={"class": "video-category-duration"})[:18]:
+        views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
 
     # with open("youtube.pkl", "rb") as f:
     #    yt = pickle.load(f)
@@ -264,6 +264,12 @@ def get_yt_views(playlistId, service):
         views += int(vid["statistics"]["viewCount"])
 
     return views
+
+def get_views_after_release(service, video, days=30):
+    youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
+    published = youtube.videos().list(part='snippet', id='video').execute()['items'][0]['snippet']['publishedAt'][:10]
+    end = (pd.to_datetime(published) + pd.Timedelta(days=days)).strftime('%Y-%m-%d')
+    views = service.reports().query(metrics='views', dimensions='day', filters='video==' + video, startDate=published, endDate=end)
 
 
 #%%
