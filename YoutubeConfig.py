@@ -47,3 +47,38 @@ COOL_JOBS = {
 BIG_IDEAS_URL = (
     "https://www.worldsciencefestival.com/video/video-library/?topic=&playlist=45075&meta="
 )
+
+BI21 = {
+    "K7QBnuF6dHg" : "Decoding the Brain",
+    "WtjkNsnC--A" : "Things We've Never Seen",
+    "6LXHtDUXkS0" : "Mind Your Language",
+    "VN19VOMHxkk" : "Does Math Reveal Reality?",
+    "5GrjjCVk6cA" : "On the Shoulders of Giants: Steven Weinberg"
+}
+
+LIVE = {
+    "9EBJNvrx60I" : "Ardem Patapoutian and David Julius",
+    "zokNLqGd9TQ" : "Saul Perlmutter",
+    "aYYhg3yts0c" : "Francis Collins"
+}
+
+BI19 = {
+    "no3qLqUYBLo" : "Beyond Higgs",
+    "ps0NSRFEAE4" : "Making Room for Machines",
+    "oCrnA4bYCag" : "We Will Be Martians",
+    "qLMLV_7hMOQ" : "Outsourcing Humanity",
+    "tdsVRh9oKiE" : "Rethinking Thinking",
+    "1FJWvEbeBps" : "The Richness of Time",
+    "w18y4iQtca0" : "Eyes in the Skies",
+    "EEhI-n_MgbY" : "The Technology That Transforms Us",
+    "RpwW9Lw2Ku4" : "RpwW9Lw2Ku4",
+    "1VajnuxMJmU" : "Physics in the Dark",
+    "S1jn86eUX0E" : "The Reality of Reality",
+    "KHa0X4y3ulw" : "On the Shoulders of Giants: Shep Doeleman",
+    "pHCfooCqTrw" : "On the Shoulders of Giants: Andrew Strominger",
+    "HPEi_CZIhuA" : "The Science of Extreme Behavior",
+    "iI9C0R3_bq0" : "Can We Cure Deafness and Blindness? Should We?",
+    "Fi66wFfOC-4" : "Revealing the Mind",
+    "YSWd21z2qqE" : "Loose Ends",
+    "Hzy7ukTQQ_Y" : "What it Takes to Boldly Go"
+}
