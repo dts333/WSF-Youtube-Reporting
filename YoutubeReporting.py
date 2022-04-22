@@ -270,6 +270,9 @@ def get_views_after_release(service, video, days=30):
     published = youtube.videos().list(part='snippet', id='video').execute()['items'][0]['snippet']['publishedAt'][:10]
     end = (pd.to_datetime(published) + pd.Timedelta(days=days)).strftime('%Y-%m-%d')
     views = service.reports().query(metrics='views', dimensions='day', filters='video==' + video, startDate=published, endDate=end)
+    
+    return views['rows']
+
 
 
 #%%
