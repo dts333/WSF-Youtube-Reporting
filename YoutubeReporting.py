@@ -267,9 +267,10 @@ def get_yt_views(playlistId, service):
 
 def get_views_after_release(service, video, days=30):
     youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
-    published = youtube.videos().list(part='snippet', id='video').execute()['items'][0]['snippet']['publishedAt'][:10]
+    snippet = youtube.videos().list(part='snippet', id='video').execute()
+    published = snippet['items'][0]['snippet']['publishedAt'][:10]
     end = (pd.to_datetime(published) + pd.Timedelta(days=days)).strftime('%Y-%m-%d')
-    views = service.reports().query(metrics='views', dimensions='day', filters='video==' + video, startDate=published, endDate=end)
+    views = service.reports().query(metrics='views', ids='channel==MINE', dimensions='day', filters='video==' + video, startDate=published, endDate=end).execute()
     
     return views['rows']
 
