@@ -6,6 +6,7 @@ Created on Wed Sep  4 14:10:01 2019
 @author: DannySwift
 """
 
+API = "AIzaSyD7fMTx7o4NMY5skRRiYylhpPL4xEyJouA"
 VIDSTATS = ["views", "average_percentage_viewed"]
 VIDSTATSTITLES = [
     "views",
@@ -49,11 +50,14 @@ BIG_IDEAS_URL = (
 )
 
 BI21 = {
+    "2HU6Hv3fM0I" : "Riddles of Reality",
+    "t9jvIyc4Hfg" : "Lifespan Expanded",
     "K7QBnuF6dHg" : "Decoding the Brain",
+    "ntxC5KMC4y0" : "Einstein and the Quantum",
     "WtjkNsnC--A" : "Things We've Never Seen",
     "6LXHtDUXkS0" : "Mind Your Language",
     "VN19VOMHxkk" : "Does Math Reveal Reality?",
-    "5GrjjCVk6cA" : "On the Shoulders of Giants: Steven Weinberg"
+    "zyaveVWKniw" : "Steven Weinberg and the Quest to Explain the World"
 }
 
 LIVE = {
@@ -71,7 +75,7 @@ BI19 = {
     "1FJWvEbeBps" : "The Richness of Time",
     "w18y4iQtca0" : "Eyes in the Skies",
     "EEhI-n_MgbY" : "The Technology That Transforms Us",
-    "RpwW9Lw2Ku4" : "RpwW9Lw2Ku4",
+    "RpwW9Lw2Ku4" : "Intelligence Without Brains",
     "1VajnuxMJmU" : "Physics in the Dark",
     "S1jn86eUX0E" : "The Reality of Reality",
     "KHa0X4y3ulw" : "On the Shoulders of Giants: Shep Doeleman",
@@ -81,4 +85,34 @@ BI19 = {
     "Fi66wFfOC-4" : "Revealing the Mind",
     "YSWd21z2qqE" : "Loose Ends",
     "Hzy7ukTQQ_Y" : "What it Takes to Boldly Go"
+}
+
+PHYSICS = {
+    "no3qLqUYBLo" : "Beyond Higgs",
+    "1FJWvEbeBps" : "The Richness of Time",
+    "1VajnuxMJmU" : "Physics in the Dark",
+    "S1jn86eUX0E" : "The Reality of Reality",
+    "YSWd21z2qqE" : "Loose Ends",
+    "ntxC5KMC4y0" : "Einstein and the Quantum"
+}
+
+LIVE_WITH_BRIAN = {
+    "zokNLqGd9TQ" : "Saul Perlmutter",
+    "9EBJNvrx60I" : "Ardem Patapoutian and David Julius",
+    "Gu28y7vZmrI" : "Max Tegmark",
+    "feds3yY3YrQ" : "Live Q+A",
+    "nO1eWxjQqaA" : "Brian Schmidt",
+    "4eVzJbxMZao" : "Paul Nurse",
+    "v6YEKYIkrzI" : "Frank Wilczek",
+    "ZXuelZVLdzM" : "Live Q+A",
+    "xk48z8N-sl0" : "Leonard Susskind",
+    "7oCQuvhQY6o" : "Roger Penrose",
+    "GmXB7IqbM1o" : "Andrea Ghez",
+    "pMXSKt9g1TE" : "Barry Barish",
+    "lcsLMvNTGeY" : "Harold Varmus",
+    "7obuj1OHt2c" : "Priyamvada Natarajan",
+    "fnk4dMW7AzY" : "Gabriela Gonzalez",
+    "GfRJZbsywPQ" : "Cumrun Vafa",
+    "HZhHovgJ680" : "Adam Riess",
+    "ntZO0lZiV-4" : "Live Q+A"
 }
