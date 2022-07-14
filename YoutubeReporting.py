@@ -444,53 +444,66 @@ if __name__ == "__main__":
 #youtube = get_authenticated_service()
 
 # %%
-try:
+today = pd.Timestamp.today().strftime("%Y-%m-%d")
+bi21 = pd.DataFrame()
+for v in BI21:
+    print(v)
+    sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+    bi21 = pd.concat([bi21, pd.DataFrame({BI21[v]: [x[1] for x in sn['rows']]})], axis=1)
+
+bi21.to_csv('BI21.csv', index=False)
+
+
+bi19 = pd.DataFrame()
+for v in BI19:
+    sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+    bi19 = pd.concat([bi19, pd.DataFrame({BI19[v]: [x[1] for x in sn['rows']]})], axis=1)
+
+bi19_top8 = bi19[['Beyond Higgs', 'Rethinking Thinking', 'The Richness of Time', 'Intelligence Without Brains', 'Physics in the Dark', 'The Reality of Reality', 'Revealing the Mind', 'Loose Ends']].copy()
+bi19_top8['Beyond Higgs'] = bi19_top8['Beyond Higgs'].shift(-4)
+bi19_top8['Rethinking Thinking'] = bi19_top8['Rethinking Thinking'].shift(-9)
+bi19_top8['The Richness of Time'] = bi19_top8['The Richness of Time'].shift(-8)
+bi19_top8['Intelligence Without Brains'] = bi19_top8['Intelligence Without Brains'].shift(-10)
+bi19_top8['Physics in the Dark'] = bi19_top8['Physics in the Dark'].shift(-2)
+bi19_top8['The Reality of Reality'] = bi19_top8['The Reality of Reality'].shift(-9)
+bi19_top8['Loose Ends'] = bi19_top8['Loose Ends'].shift(-12)
+bi19_top8.to_csv("bi19_top8.csv")
+
+avgView31 = bi21.iloc[31].dropna().sum() / bi21.iloc[31].dropna().shape[0]
+avgView5 = bi21.iloc[5].dropna().sum() / bi21.iloc[5].dropna().shape[0]
+
+
+bi212 = pd.DataFrame()
+for v in BI21:
+    sn = service.reports().query(metrics='estimatedMinutesWatched', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+    bi212 = pd.concat([bi212, pd.DataFrame({f'{BI21[v]} minutes': [x[1] for x in sn['rows']]})], axis=1)
+
+def get_average_view_duration(vids, duration, service):
+    youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
+    v = 0
+    emw = 0
+    for video in vids:
+        snippet = youtube.videos().list(part='snippet', id=video).execute()
+        published = snippet['items'][0]['snippet']['publishedAt'][:10]
+        end = (pd.to_datetime(published) + pd.Timedelta(days=duration)).strftime('%Y-%m-%d')
+        response = service.reports().query(metrics='views,estimatedMinutesWatched', ids='channel==MINE', filters='video==' + video, startDate=published, endDate=end).execute()
+        v += response['rows'][0][0]
+        emw += response['rows'][0][1]
+    
+    return emw / v
+# %%
+def get_agg_geo_views(vids, service):
     today = pd.Timestamp.today().strftime("%Y-%m-%d")
-    bi21 = pd.DataFrame()
-    for v in BI21:
-        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
-        bi21 = pd.concat([bi21, pd.DataFrame({BI21[v]: [x[1] for x in sn['rows']]})], axis=1)
+    agg = {}
+    for vid in vids:
+        r = service.reports().query(metrics='views', dimensions='country', ids='channel==MINE', filters='video=='+vid, startDate='2008-01-01', endDate=today).execute()
+        for row in r['rows']:
+            agg.setdefault(row[0], 0)
+            agg[row[0]] += int(row[1])
+    df = pd.DataFrame({'country': agg.keys(), 'views': agg.values()})
+    total = df.views.sum()
+    df['percent'] = df.views / total * 100
+    
+    return df.sort_values('views')
 
-    bi21.to_csv('BI21.csv')
-
-
-    bi19 = pd.DataFrame()
-    for v in BI19:
-        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
-        bi19 = pd.concat([bi19, pd.DataFrame({BI19[v]: [x[1] for x in sn['rows']]})], axis=1)
-
-    bi19_top8 = bi19[['Beyond Higgs', 'Rethinking Thinking', 'The Richness of Time', 'Intelligence Without Brains', 'Physics in the Dark', 'The Reality of Reality', 'Revealing the Mind', 'Loose Ends']].copy()
-    bi19_top8['Beyond Higgs'] = bi19_top8['Beyond Higgs'].shift(-4)
-    bi19_top8['Rethinking Thinking'] = bi19_top8['Rethinking Thinking'].shift(-9)
-    bi19_top8['The Richness of Time'] = bi19_top8['The Richness of Time'].shift(-8)
-    bi19_top8['Intelligence Without Brains'] = bi19_top8['Intelligence Without Brains'].shift(-10)
-    bi19_top8['Physics in the Dark'] = bi19_top8['Physics in the Dark'].shift(-2)
-    bi19_top8['The Reality of Reality'] = bi19_top8['The Reality of Reality'].shift(-9)
-    bi19_top8['Loose Ends'] = bi19_top8['Loose Ends'].shift(-12)
-    bi19_top8.to_csv("bi19_top8.csv")
-
-    avgView31 = bi21.iloc[31].dropna().sum() / bi21.iloc[31].dropna().shape[0]
-    avgView5 = bi21.iloc[5].dropna().sum() / bi21.iloc[5].dropna().shape[0]
-
-
-    bi212 = pd.DataFrame()
-    for v in BI21:
-        sn = service.reports().query(metrics='estimatedMinutesWatched', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
-        bi212 = pd.concat([bi212, pd.DataFrame({f'{BI21[v]} minutes': [x[1] for x in sn['rows']]})], axis=1)
-
-    def get_average_view_duration(vids, duration, service):
-        youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
-        v = 0
-        emw = 0
-        for video in vids:
-            snippet = youtube.videos().list(part='snippet', id=video).execute()
-            published = snippet['items'][0]['snippet']['publishedAt'][:10]
-            end = (pd.to_datetime(published) + pd.Timedelta(days=duration)).strftime('%Y-%m-%d')
-            response = service.reports().query(metrics='views,estimatedMinutesWatched', ids='channel==MINE', filters='video==' + video, startDate=published, endDate=end).execute()
-            v += response['rows'][0][0]
-            emw += response['rows'][0][1]
-        
-        return emw / v
-except:
-    pass
 # %%
