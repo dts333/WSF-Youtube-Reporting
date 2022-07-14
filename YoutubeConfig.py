@@ -6,6 +6,7 @@ Created on Wed Sep  4 14:10:01 2019
 @author: DannySwift
 """
 
+API = "AIzaSyD7fMTx7o4NMY5skRRiYylhpPL4xEyJouA"
 VIDSTATS = ["views", "average_percentage_viewed"]
 VIDSTATSTITLES = [
     "views",
@@ -49,17 +50,22 @@ BIG_IDEAS_URL = (
 )
 
 BI21 = {
+    "UtcBFlWSqGM" : "Black Holes",
+    "2HU6Hv3fM0I" : "Riddles of Reality",
+    "t9jvIyc4Hfg" : "Lifespan Expanded",
     "K7QBnuF6dHg" : "Decoding the Brain",
+    "ntxC5KMC4y0" : "Einstein and the Quantum",
     "WtjkNsnC--A" : "Things We've Never Seen",
     "6LXHtDUXkS0" : "Mind Your Language",
     "VN19VOMHxkk" : "Does Math Reveal Reality?",
-    "5GrjjCVk6cA" : "On the Shoulders of Giants: Steven Weinberg"
+    "zyaveVWKniw" : "Steven Weinberg and the Quest to Explain the World"
 }
 
 LIVE = {
     "9EBJNvrx60I" : "Ardem Patapoutian and David Julius",
     "zokNLqGd9TQ" : "Saul Perlmutter",
-    "aYYhg3yts0c" : "Francis Collins"
+    "aYYhg3yts0c" : "Francis Collins",
+    "bHKbIhSWpl4" : "School's Out"
 }
 
 BI19 = {
@@ -71,7 +77,7 @@ BI19 = {
     "1FJWvEbeBps" : "The Richness of Time",
     "w18y4iQtca0" : "Eyes in the Skies",
     "EEhI-n_MgbY" : "The Technology That Transforms Us",
-    "RpwW9Lw2Ku4" : "RpwW9Lw2Ku4",
+    "RpwW9Lw2Ku4" : "Intelligence Without Brains",
     "1VajnuxMJmU" : "Physics in the Dark",
     "S1jn86eUX0E" : "The Reality of Reality",
     "KHa0X4y3ulw" : "On the Shoulders of Giants: Shep Doeleman",
@@ -82,3 +88,35 @@ BI19 = {
     "YSWd21z2qqE" : "Loose Ends",
     "Hzy7ukTQQ_Y" : "What it Takes to Boldly Go"
 }
+
+PHYSICS = {
+    "no3qLqUYBLo" : "Beyond Higgs",
+    "1FJWvEbeBps" : "The Richness of Time",
+    "1VajnuxMJmU" : "Physics in the Dark",
+    "S1jn86eUX0E" : "The Reality of Reality",
+    "YSWd21z2qqE" : "Loose Ends",
+    "ntxC5KMC4y0" : "Einstein and the Quantum"
+}
+
+LIVE_WITH_BRIAN = {
+    "zokNLqGd9TQ" : "Saul Perlmutter",
+    "9EBJNvrx60I" : "Ardem Patapoutian and David Julius",
+    "Gu28y7vZmrI" : "Max Tegmark",
+    "feds3yY3YrQ" : "Live Q+A",
+    "nO1eWxjQqaA" : "Brian Schmidt",
+    "4eVzJbxMZao" : "Paul Nurse",
+    "v6YEKYIkrzI" : "Frank Wilczek",
+    "ZXuelZVLdzM" : "Live Q+A",
+    "xk48z8N-sl0" : "Leonard Susskind",
+    "7oCQuvhQY6o" : "Roger Penrose",
+    "GmXB7IqbM1o" : "Andrea Ghez",
+    "pMXSKt9g1TE" : "Barry Barish",
+    "lcsLMvNTGeY" : "Harold Varmus",
+    "7obuj1OHt2c" : "Priyamvada Natarajan",
+    "fnk4dMW7AzY" : "Gabriela Gonzalez",
+    "GfRJZbsywPQ" : "Cumrun Vafa",
+    "HZhHovgJ680" : "Adam Riess",
+    "ntZO0lZiV-4" : "Live Q+A"
+}
+
+WSU_VIDS_ON_WSF_YT = ['6fzrdEJgSzQ', 'SHPoIrQEKWU', 'KMuz_bTRBGA', 'zMkBAEd7A2s', 'MWORkITfgWA', 'Ja3pwczB4FM', 'QltOI5_Ko_o', '1bGOOXdWgm4', 'ejW87b-FpCU', 'V6oNvSCpiKM', '9hwL5YCwWgc', 'zLUkCgykyI8', 'lQADV6sS8g8', 'x3wq4g6_7wY', 'wTelLHqDbeg', 'NCSYW_sevyc', 'nFbU8hIEzFA', 'eQZCTrJYkYI', 'DKQaXcQHsBM', 'SxmLdJvJ8lc', 't40tlEDwjyg', 'aQNWR9WftHY', 'YcPPGVigvZk', '-NBkgjJhI5U', 'dpqBpY6aGMw', 'xxoqw8nubrc', 'zhVSDP-qDok', 'XFV2feKDK9E', 'HTumBSpjX2c', 'ds1oaReVve4', 'tFOxfjs53u8', 'cqszNrp1EDQ', 'CKJuC5CUMgU', 'vdHbQjVlrfc', 'Fhid7_BhUss', 'wPt3f7yRYUE', 'MQXNSKYCWXw', 'C6-3RjV3GS8']
