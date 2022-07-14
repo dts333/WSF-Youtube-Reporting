@@ -28,6 +28,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # from gspread_pandas import Client
 
 from YoutubeConfig import (
+    API,
     VIDSTATS,
     VIDSTATSTITLES,
     CHANNELSTATS,
@@ -38,6 +39,8 @@ from YoutubeConfig import (
     YDEID,
     BIG_IDEAS_URL,
     # GOOGLE_SHEET,
+    BI19,
+    BI21
 )
 
 CLIENT_SECRETS_FILE = "client_secret.json"
@@ -207,14 +210,14 @@ def fetch_all_data():
     views["Your Daily Equation"] = yt_data_from_wsf(64767, 2)
     views["Kavli"] = yt_data_from_wsf(34438, 1)
 
-    views["Big Ideas 2019"] = 0
-    for div in BeautifulSoup(
-        requests.get(
-            "https://www.worldsciencefestival.com/video/video-library/page/1/?topic&playlist=45075&meta"
-        ).content,
-        "html.parser",
-    ).find_all(attrs={"class": "video-category-duration"})[:18]:
-        views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
+    #views["Big Ideas 2019"] = 0
+    #for div in BeautifulSoup(
+    #    requests.get(
+    #        "https://www.worldsciencefestival.com/video/video-library/page/1/?topic&playlist=45075&meta"
+    #    ).content,
+    #    "html.parser",
+    #).find_all(attrs={"class": "video-category-duration"})[:18]:
+    #    views["Big Ideas 2019"] += int(div.getText().split(" ")[0].replace(",", ""))
 
     # with open("youtube.pkl", "rb") as f:
     #    yt = pickle.load(f)
@@ -267,7 +270,7 @@ def get_yt_views(playlistId, service):
 
 def get_views_after_release(service, video, days=30):
     youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
-    snippet = youtube.videos().list(part='snippet', id='video').execute()
+    snippet = youtube.videos().list(part='snippet', id=video).execute()
     published = snippet['items'][0]['snippet']['publishedAt'][:10]
     end = (pd.to_datetime(published) + pd.Timedelta(days=days)).strftime('%Y-%m-%d')
     views = service.reports().query(metrics='views', ids='channel==MINE', dimensions='day', filters='video==' + video, startDate=published, endDate=end).execute()
@@ -436,3 +439,58 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#%%
+#youtube = get_authenticated_service()
+
+# %%
+try:
+    today = pd.Timestamp.today().strftime("%Y-%m-%d")
+    bi21 = pd.DataFrame()
+    for v in BI21:
+        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi21 = pd.concat([bi21, pd.DataFrame({BI21[v]: [x[1] for x in sn['rows']]})], axis=1)
+
+    bi21.to_csv('BI21.csv')
+
+
+    bi19 = pd.DataFrame()
+    for v in BI19:
+        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi19 = pd.concat([bi19, pd.DataFrame({BI19[v]: [x[1] for x in sn['rows']]})], axis=1)
+
+    bi19_top8 = bi19[['Beyond Higgs', 'Rethinking Thinking', 'The Richness of Time', 'Intelligence Without Brains', 'Physics in the Dark', 'The Reality of Reality', 'Revealing the Mind', 'Loose Ends']].copy()
+    bi19_top8['Beyond Higgs'] = bi19_top8['Beyond Higgs'].shift(-4)
+    bi19_top8['Rethinking Thinking'] = bi19_top8['Rethinking Thinking'].shift(-9)
+    bi19_top8['The Richness of Time'] = bi19_top8['The Richness of Time'].shift(-8)
+    bi19_top8['Intelligence Without Brains'] = bi19_top8['Intelligence Without Brains'].shift(-10)
+    bi19_top8['Physics in the Dark'] = bi19_top8['Physics in the Dark'].shift(-2)
+    bi19_top8['The Reality of Reality'] = bi19_top8['The Reality of Reality'].shift(-9)
+    bi19_top8['Loose Ends'] = bi19_top8['Loose Ends'].shift(-12)
+    bi19_top8.to_csv("bi19_top8.csv")
+
+    avgView31 = bi21.iloc[31].dropna().sum() / bi21.iloc[31].dropna().shape[0]
+    avgView5 = bi21.iloc[5].dropna().sum() / bi21.iloc[5].dropna().shape[0]
+
+
+    bi212 = pd.DataFrame()
+    for v in BI21:
+        sn = service.reports().query(metrics='estimatedMinutesWatched', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi212 = pd.concat([bi212, pd.DataFrame({f'{BI21[v]} minutes': [x[1] for x in sn['rows']]})], axis=1)
+
+    def get_average_view_duration(vids, duration, service):
+        youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
+        v = 0
+        emw = 0
+        for video in vids:
+            snippet = youtube.videos().list(part='snippet', id=video).execute()
+            published = snippet['items'][0]['snippet']['publishedAt'][:10]
+            end = (pd.to_datetime(published) + pd.Timedelta(days=duration)).strftime('%Y-%m-%d')
+            response = service.reports().query(metrics='views,estimatedMinutesWatched', ids='channel==MINE', filters='video==' + video, startDate=published, endDate=end).execute()
+            v += response['rows'][0][0]
+            emw += response['rows'][0][1]
+        
+        return emw / v
+except:
+    pass
+# %%
