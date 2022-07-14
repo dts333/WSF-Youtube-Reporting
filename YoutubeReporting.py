@@ -39,7 +39,6 @@ from YoutubeConfig import (
     YDEID,
     BIG_IDEAS_URL,
     # GOOGLE_SHEET,
-    BI19,
     BI21
 )
 
