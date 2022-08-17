@@ -442,6 +442,21 @@ if __name__ == "__main__":
 #%%
 #youtube = get_authenticated_service()
 
+#%%
+def get_big_ideas_ids(service):
+    url = "https://www.worldsciencefestival.com/video/playlists/big-ideas/"
+    soup = BeautifulSoup(requests.get(url).content, "html.parser")
+    pages = [x.contents[0]['href'] for x in soup.find_all(attrs={"class": "video-title"})]
+    ids = []
+    for page in pages:
+        soup = BeautifulSoup(requests.get(page).content, "html.parser")
+        try:
+            id = soup.find_all("meta", attrs={"property":"og:video"})[0]["content"].split("/")[-1]
+        except:
+            print(page)
+        ids.append(id)
+    
+    return ids
 # %%
 today = pd.Timestamp.today().strftime("%Y-%m-%d")
 bi21 = pd.DataFrame()
@@ -491,11 +506,11 @@ def get_average_view_duration(vids, duration, service):
     
     return emw / v
 # %%
-def get_agg_geo_views(vids, service):
+def get_agg_geo_views(vids, service, start='2008-01-01'):
     today = pd.Timestamp.today().strftime("%Y-%m-%d")
     agg = {}
     for vid in vids:
-        r = service.reports().query(metrics='views', dimensions='country', ids='channel==MINE', filters='video=='+vid, startDate='2008-01-01', endDate=today).execute()
+        r = service.reports().query(metrics='views', dimensions='country', ids='channel==MINE', filters='video=='+vid, startDate=start, endDate=today).execute()
         for row in r['rows']:
             agg.setdefault(row[0], 0)
             agg[row[0]] += int(row[1])
