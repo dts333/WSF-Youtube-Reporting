@@ -50,6 +50,7 @@ BIG_IDEAS_URL = (
 )
 
 BI21 = {
+    "5sMZw_DM5eA" : "Stunning First Images",
     "UtcBFlWSqGM" : "Black Holes",
     "2HU6Hv3fM0I" : "Riddles of Reality",
     "t9jvIyc4Hfg" : "Lifespan Expanded",
@@ -120,3 +121,6 @@ LIVE_WITH_BRIAN = {
 }
 
 WSU_VIDS_ON_WSF_YT = ['6fzrdEJgSzQ', 'SHPoIrQEKWU', 'KMuz_bTRBGA', 'zMkBAEd7A2s', 'MWORkITfgWA', 'Ja3pwczB4FM', 'QltOI5_Ko_o', '1bGOOXdWgm4', 'ejW87b-FpCU', 'V6oNvSCpiKM', '9hwL5YCwWgc', 'zLUkCgykyI8', 'lQADV6sS8g8', 'x3wq4g6_7wY', 'wTelLHqDbeg', 'NCSYW_sevyc', 'nFbU8hIEzFA', 'eQZCTrJYkYI', 'DKQaXcQHsBM', 'SxmLdJvJ8lc', 't40tlEDwjyg', 'aQNWR9WftHY', 'YcPPGVigvZk', '-NBkgjJhI5U', 'dpqBpY6aGMw', 'xxoqw8nubrc', 'zhVSDP-qDok', 'XFV2feKDK9E', 'HTumBSpjX2c', 'ds1oaReVve4', 'tFOxfjs53u8', 'cqszNrp1EDQ', 'CKJuC5CUMgU', 'vdHbQjVlrfc', 'Fhid7_BhUss', 'wPt3f7yRYUE', 'MQXNSKYCWXw', 'C6-3RjV3GS8']
+
+A_TEST = ['ADiql3FG5is', 'nNtR5da5LIE', '3JE_KMfuEWk', 'CKJuC5CUMgU', 'Fi66wFfOC-4', 'IxRfDtaot5U', 'VN19VOMHxkk', 'p0_-7FmrDq8', 'YdjERhTczAs', 'h9MS9i-CdfY', 'tdsVRh9oKiE', 'TI6sY0kCPpk', 'SObhSqYglvQ', 'BFrBr8oUVXU', 'GdqC2bVLesQ', 'e0vKOYQUmgg', 'PTqLPvBz8xc', 'kT9GqvgipOQ', 'OO4uzgiRHkE', 'KDCJZ81PwVM', 'rU_pfCtSWF4', 'DfY-DRsE86s', 'no3qLqUYBLo', '59ODYOaUbX4', 'iMYJn2-1u2Q', 'SK48AsRIMM8', '3EOpHHjv5g8', '1VajnuxMJmU', 'CoF1Bx-glaw', '9gAcHKraVWE', 'xj6vV3T4ok8', 'n2szWY9xSzU', '7oCQuvhQY6o', 'xk48z8N-sl0', '92A5iDjxgOg']
+B_TEST = ['WtjkNsnC--A', 'DPPnrDdNoUU', 'S1jn86eUX0E', 'aUW7patpm9s', 'qMMgsjnI1is', '7f9d7XZu8UQ', 'YSWd21z2qqE', 'HnETCBOlzJs', '6LXHtDUXkS0', 'RNRZchHaKgw', 'XFV2feKDK9E']
