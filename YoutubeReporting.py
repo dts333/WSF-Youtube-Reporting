@@ -39,6 +39,7 @@ from YoutubeConfig import (
     YDEID,
     BIG_IDEAS_URL,
     # GOOGLE_SHEET,
+    BI19,
     BI21
 )
 
@@ -204,7 +205,13 @@ def yt_data_from_wsf(playlist, pages):
 
 def fetch_all_data():
     views = {}
-    views["Big Ideas"] = yt_data_from_wsf(45075, 6)
+    v = 0
+    bi = get_big_ideas_ids()
+    for id in bi:
+        vid = service.reports().query(metrics='views', ids='channel==MINE', filters='video==' + id, startDate="2008-02-01", endDate=datetime.today().strftime("%Y-%m-%d")).execute()['rows'][0][0]
+        v += vid
+    views["Big Ideas"] = v
+    # views["Big Ideas"] = yt_data_from_wsf(45075, 6)
     # views['Cool Jobs'] = yt_data_from_wsf(64848, 2)
     views["Your Daily Equation"] = yt_data_from_wsf(64767, 2)
     views["Kavli"] = yt_data_from_wsf(34438, 1)
@@ -440,10 +447,10 @@ if __name__ == "__main__":
     main()
 
 #%%
-#youtube = get_authenticated_service()
+service = get_authenticated_service()
 
 #%%
-def get_big_ideas_ids(service):
+def get_big_ideas_ids():
     url = "https://www.worldsciencefestival.com/video/playlists/big-ideas/"
     soup = BeautifulSoup(requests.get(url).content, "html.parser")
     pages = [x.contents[0]['href'] for x in soup.find_all(attrs={"class": "video-title"})]
@@ -506,11 +513,19 @@ def get_average_view_duration(vids, duration, service):
     
     return emw / v
 # %%
-def get_agg_geo_views(vids, service, start='2008-01-01'):
-    today = pd.Timestamp.today().strftime("%Y-%m-%d")
+def get_agg_geo_views(vids, service, start='2008-01-01', end=None):
+    if not end:
+        end = pd.Timestamp.today().strftime("%Y-%m-%d")
     agg = {}
     for vid in vids:
-        r = service.reports().query(metrics='views', dimensions='country', ids='channel==MINE', filters='video=='+vid, startDate=start, endDate=today).execute()
+        r = service.reports().query(
+            metrics='views', 
+            dimensions='country', 
+            ids='channel==MINE', 
+            filters='video=='+vid, 
+            startDate=start, 
+            endDate=end
+            ).execute()
         for row in r['rows']:
             agg.setdefault(row[0], 0)
             agg[row[0]] += int(row[1])
@@ -520,4 +535,75 @@ def get_agg_geo_views(vids, service, start='2008-01-01'):
     
     return df.sort_values('views')
 
+# %%
+def get_shorts(vids, duration, service):
+    youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
+    v = []
+    for video in vids.values:
+        cd = youtube.videos().list(part='contentDetails', id=video[0]).execute()
+        dur = cd['items'][0]['contentDetails']['duration'][2:]
+        dur = dur.split("M")[0]
+        try:
+            dur = int(dur)
+            if dur < duration:
+                v.append(video[0])
+        except:
+            continue
+    
+    return v
+
+#%%
+# Returns all replies the top-level comment has: 
+# topCommentId = it's the id of the top-level comment you want to retrieve its replies.
+# replies = array of replies returned by this function. 
+# token = the comments.list might return moren than 100 comments, if so, use the nextPageToken for retrieve the next batch of results.
+def getAllTopLevelCommentReplies(topCommentId, replies, token): 
+    replies_response=youtube.comments().list(part='snippet',
+                                               maxResults=100,
+                                               parentId=topCommentId,
+                                               pageToken=token).execute()
+
+    for item in replies_response['items']:
+        # Append the reply's text to the 
+        replies.append(item['snippet']['textDisplay'])
+
+    if "nextPageToken" in replies_response: 
+        return getAllTopLevelCommentReplies(topCommentId, replies, replies_response['nextPageToken'])
+    else:
+        return replies
+
+
+def get_comments(youtube, video_id, comments=[], token=''):
+    youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
+
+    # Stores the total reply count a top level commnet has.
+    totalReplyCount = 0
+    
+    # Replies of the top-level comment might have.
+    replies=[]
+
+    video_response=youtube.commentThreads().list(part='snippet',
+                                                videoId=video_id,
+                                                pageToken=token).execute()
+    for item in video_response['items']:
+        comment = item['snippet']['topLevelComment']
+        text = comment['snippet']['textDisplay']
+        comments.append(text)
+
+        # Get the total reply count: 
+        totalReplyCount = item['snippet']['totalReplyCount']
+        
+        # Check if the total reply count is greater than zero, 
+        # if so,call the new function "getAllTopLevelCommentReplies(topCommentId, replies, token)" 
+        # and extend the "comments" returned list.
+        if (totalReplyCount > 0): 
+            comments.extend(getAllTopLevelCommentReplies(comment['id'], replies, None)) 
+            
+        # Clear variable - just in case - not sure if need due "get_comments" function initializes the variable.
+        replies = []
+
+    if "nextPageToken" in video_response: 
+        return get_comments(youtube, video_id, comments, video_response['nextPageToken'])
+    else:
+        return comments
 # %%
