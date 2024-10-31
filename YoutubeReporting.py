@@ -38,9 +38,13 @@ from YoutubeConfig import (
     CJID,
     YDEID,
     BIG_IDEAS_URL,
+    KAVLI_URL,
     # GOOGLE_SHEET,
     BI19,
-    BI21
+    BI21,
+    BI61300,
+    BI62375,
+    LIVE22
 )
 
 CLIENT_SECRETS_FILE = "client_secret.json"
@@ -206,15 +210,22 @@ def yt_data_from_wsf(playlist, pages):
 def fetch_all_data():
     views = {}
     v = 0
-    bi = get_big_ideas_ids()
+    bi = get_ids(BIG_IDEAS_URL)
     for id in bi:
         vid = service.reports().query(metrics='views', ids='channel==MINE', filters='video==' + id, startDate="2008-02-01", endDate=datetime.today().strftime("%Y-%m-%d")).execute()['rows'][0][0]
         v += vid
     views["Big Ideas"] = v
+
+    v = 0 
+    k = get_ids(KAVLI_URL)
+    for id in k:
+        vid = service.reports().query(metrics='views', ids='channel==MINE', filters='video==' + id, startDate="2008-02-01", endDate=datetime.today().strftime("%Y-%m-%d")).execute()['rows'][0][0]
+        v += vid
+    views["Kavli"] = v
     # views["Big Ideas"] = yt_data_from_wsf(45075, 6)
     # views['Cool Jobs'] = yt_data_from_wsf(64848, 2)
-    views["Your Daily Equation"] = yt_data_from_wsf(64767, 2)
-    views["Kavli"] = yt_data_from_wsf(34438, 1)
+    # views["Your Daily Equation"] = yt_data_from_wsf(64767, 2)
+    # views["Kavli"] = yt_data_from_wsf(34438, 1)
 
     #views["Big Ideas 2019"] = 0
     #for div in BeautifulSoup(
@@ -443,15 +454,11 @@ def main():
     sheet.df_to_sheet(top5demos.T, sheet=today, start=(7, 28), index=False)
 
 
-if __name__ == "__main__":
-    main()
-
 #%%
 service = get_authenticated_service()
 
 #%%
-def get_big_ideas_ids():
-    url = "https://www.worldsciencefestival.com/video/playlists/big-ideas/"
+def get_ids(url=BIG_IDEAS_URL):
     soup = BeautifulSoup(requests.get(url).content, "html.parser")
     pages = [x.contents[0]['href'] for x in soup.find_all(attrs={"class": "video-title"})]
     ids = []
@@ -461,44 +468,68 @@ def get_big_ideas_ids():
             id = soup.find_all("meta", attrs={"property":"og:video"})[0]["content"].split("/")[-1]
         except:
             print(page)
+            continue
         ids.append(id)
     
     return ids
 # %%
-today = pd.Timestamp.today().strftime("%Y-%m-%d")
-bi21 = pd.DataFrame()
-for v in BI21:
-    print(v)
-    sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
-    bi21 = pd.concat([bi21, pd.DataFrame({BI21[v]: [x[1] for x in sn['rows']]})], axis=1)
+def update_grant_level_data():
+    today = pd.Timestamp.today().strftime("%Y-%m-%d")
+    bi21 = pd.DataFrame()
+    for v in BI21:
+        print(v)
+        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi21 = pd.concat([bi21, pd.DataFrame({BI21[v]: [x[1] for x in sn['rows']]})], axis=1)
 
-bi21.to_csv('BI21.csv', index=False)
+    bi21.to_csv('BI21.csv', index=False)
 
+    bi61300 = pd.DataFrame()
+    for v in BI61300:
+        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi61300 = pd.concat([bi61300, pd.DataFrame({BI61300[v]: [x[1] for x in sn['rows']]})], axis=1)
 
-bi19 = pd.DataFrame()
-for v in BI19:
-    sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
-    bi19 = pd.concat([bi19, pd.DataFrame({BI19[v]: [x[1] for x in sn['rows']]})], axis=1)
+    bi61300.to_csv('BI61300.csv', index=False)
 
-bi19_top8 = bi19[['Beyond Higgs', 'Rethinking Thinking', 'The Richness of Time', 'Intelligence Without Brains', 'Physics in the Dark', 'The Reality of Reality', 'Revealing the Mind', 'Loose Ends']].copy()
-bi19_top8['Beyond Higgs'] = bi19_top8['Beyond Higgs'].shift(-4)
-bi19_top8['Rethinking Thinking'] = bi19_top8['Rethinking Thinking'].shift(-9)
-bi19_top8['The Richness of Time'] = bi19_top8['The Richness of Time'].shift(-8)
-bi19_top8['Intelligence Without Brains'] = bi19_top8['Intelligence Without Brains'].shift(-10)
-bi19_top8['Physics in the Dark'] = bi19_top8['Physics in the Dark'].shift(-2)
-bi19_top8['The Reality of Reality'] = bi19_top8['The Reality of Reality'].shift(-9)
-bi19_top8['Loose Ends'] = bi19_top8['Loose Ends'].shift(-12)
-bi19_top8.to_csv("bi19_top8.csv")
+    bi62375 = pd.DataFrame()
+    for v in BI62375:
+        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi62375 = pd.concat([bi62375, pd.DataFrame({BI62375[v]: [x[1] for x in sn['rows']]})], axis=1)
 
-avgView31 = bi21.iloc[31].dropna().sum() / bi21.iloc[31].dropna().shape[0]
-avgView5 = bi21.iloc[5].dropna().sum() / bi21.iloc[5].dropna().shape[0]
+    bi62375.to_csv('BI62375.csv', index=False)
 
 
-bi212 = pd.DataFrame()
-for v in BI21:
-    sn = service.reports().query(metrics='estimatedMinutesWatched', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
-    bi212 = pd.concat([bi212, pd.DataFrame({f'{BI21[v]} minutes': [x[1] for x in sn['rows']]})], axis=1)
+    live22 = pd.DataFrame()
+    for v in LIVE22:
+        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        live22 = pd.concat([live22, pd.DataFrame({LIVE22[v]: [x[1] for x in sn['rows']]})], axis=1)
+    live22.to_csv('live22.csv', index=False)
 
+
+    bi19 = pd.DataFrame()
+    for v in BI19:
+        sn = service.reports().query(metrics='views', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi19 = pd.concat([bi19, pd.DataFrame({BI19[v]: [x[1] for x in sn['rows']]})], axis=1)
+
+    bi19_top8 = bi19[['Beyond Higgs', 'Rethinking Thinking', 'The Richness of Time', 'Intelligence Without Brains', 'Physics in the Dark', 'The Reality of Reality', 'Revealing the Mind', 'Loose Ends']].copy()
+    bi19_top8['Beyond Higgs'] = bi19_top8['Beyond Higgs'].shift(-4)
+    bi19_top8['Rethinking Thinking'] = bi19_top8['Rethinking Thinking'].shift(-9)
+    bi19_top8['The Richness of Time'] = bi19_top8['The Richness of Time'].shift(-8)
+    bi19_top8['Intelligence Without Brains'] = bi19_top8['Intelligence Without Brains'].shift(-10)
+    bi19_top8['Physics in the Dark'] = bi19_top8['Physics in the Dark'].shift(-2)
+    bi19_top8['The Reality of Reality'] = bi19_top8['The Reality of Reality'].shift(-9)
+    bi19_top8['Loose Ends'] = bi19_top8['Loose Ends'].shift(-12)
+    bi19_top8.to_csv("bi19_top8.csv")
+
+    #avgView31 = bi21.iloc[31].dropna().sum() / bi21.iloc[31].dropna().shape[0]
+    #avgView5 = bi21.iloc[5].dropna().sum() / bi21.iloc[5].dropna().shape[0]
+
+
+    bi212 = pd.DataFrame()
+    for v in BI21:
+        sn = service.reports().query(metrics='estimatedMinutesWatched', dimensions='day', ids='channel==MINE', filters='video=='+v, startDate='2008-01-01', endDate=today).execute()
+        bi212 = pd.concat([bi212, pd.DataFrame({f'{BI21[v]} minutes': [x[1] for x in sn['rows']]})], axis=1)
+
+#%%)
 def get_average_view_duration(vids, duration, service):
     youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
     v = 0
@@ -535,6 +566,49 @@ def get_agg_geo_views(vids, service, start='2008-01-01', end=None):
     
     return df.sort_values('views')
 
+def get_agg_demo_views(vids, service, start='2008-01-01', end=None):
+    if not end:
+        end = pd.Timestamp.today().strftime("%Y-%m-%d")
+    df = pd.DataFrame()
+    for vid in vids:
+        ndf = get_demo_data(vid, start=start, end=end, service=service)
+        ndf *= service.reports().query(metrics='views',ids='channel==MINE', filters='video==' + vid, startDate=start, endDate=end).execute()['rows'][0][0]
+        df = pd.concat([df, ndf])
+    
+    return df
+
+    
+def get_views_as_of(vids, service, end, start="2008-02-01"):
+    v = 0
+    for vid in vids:
+        v += service.reports().query(
+            metrics='views',
+            ids='channel==MINE',
+            filters='video==' + vid,
+            startDate=start,
+            endDate=end
+        ).execute()['rows'][0][0]
+    
+    return v
+
+#%%
+def get_all_vids():
+    vids = []
+    youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
+    uploads = youtube.channels().list(part='contentDetails', id=WSFID).execute()['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+    res = youtube.playlistItems().list(playlistId=uploads, part='id', maxResults=50).execute()
+    nextPageToken = res['nextPageToken']
+    for item in res['items']:
+        vids.append(item['etag'])    
+    while 'nextPageToken' in res:
+        res = youtube.playlistItems().list(playlistId=uploads, part='id', maxResults=50, pageToken=nextPageToken).execute()
+        print(len(vids))
+        for item in res['items']:
+            vids.append(item['etag'])
+        if len(vids) > 2000:
+            break
+    
+    return vids
 # %%
 def get_shorts(vids, duration, service):
     youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=API)
@@ -557,7 +631,7 @@ def get_shorts(vids, duration, service):
 # topCommentId = it's the id of the top-level comment you want to retrieve its replies.
 # replies = array of replies returned by this function. 
 # token = the comments.list might return moren than 100 comments, if so, use the nextPageToken for retrieve the next batch of results.
-def getAllTopLevelCommentReplies(topCommentId, replies, token): 
+def getAllTopLevelCommentReplies(youtube, topCommentId, replies, token): 
     replies_response=youtube.comments().list(part='snippet',
                                                maxResults=100,
                                                parentId=topCommentId,
@@ -597,7 +671,7 @@ def get_comments(youtube, video_id, comments=[], token=''):
         # if so,call the new function "getAllTopLevelCommentReplies(topCommentId, replies, token)" 
         # and extend the "comments" returned list.
         if (totalReplyCount > 0): 
-            comments.extend(getAllTopLevelCommentReplies(comment['id'], replies, None)) 
+            comments.extend(getAllTopLevelCommentReplies(youtube, comment['id'], replies, None)) 
             
         # Clear variable - just in case - not sure if need due "get_comments" function initializes the variable.
         replies = []
@@ -606,4 +680,8 @@ def get_comments(youtube, video_id, comments=[], token=''):
         return get_comments(youtube, video_id, comments, video_response['nextPageToken'])
     else:
         return comments
+# %%
+#service.reports().query(metrics="views", dimensions="liveOrOnDemand", ids="channel==MINE", filters='video==' + "5Iy5mt7F_N4", startDate="2008-01-01", endDate="2023-12-12").execute()
+# %%
+#fetch_all_data()
 # %%
