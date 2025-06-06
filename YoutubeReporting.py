@@ -455,7 +455,7 @@ def main():
 
 
 #%%
-service = get_authenticated_service()
+#service = get_authenticated_service()
 
 #%%
 def get_ids(url=BIG_IDEAS_URL):
@@ -684,4 +684,8 @@ def get_comments(youtube, video_id, comments=[], token=''):
 #service.reports().query(metrics="views", dimensions="liveOrOnDemand", ids="channel==MINE", filters='video==' + "5Iy5mt7F_N4", startDate="2008-01-01", endDate="2023-12-12").execute()
 # %%
 #fetch_all_data()
+# %%
+if __name__ == "__main__":
+    service = get_authenticated_service()
+    print(fetch_all_data())
 # %%
